@@ -21,7 +21,7 @@ int main() {
     std::vector<User> users;
     users.push_back(User(100, "김철수", "kim@ssu.ac.kr"));
 
-    std::vetor<Rating> ratings;
+    std::vector<Rating> ratings;
     ratings.push_back(Rating(100, 1, 4.5));
 
     std::cout << "사용자 및 평점 확인" << std::endl;
