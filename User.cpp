@@ -1,4 +1,4 @@
-#include "User.cpp"
+#include "User.h"
 #include <iostream>
 
 User::User(int id, const std::string& name,
