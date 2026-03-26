@@ -1,23 +1,33 @@
-#include "Movie.h"
+#include "User.h"
+#include "Rating.h"
 #include <iostream>
+#include <vector>
 
 int main() {
-    Movie m1(1, "기생충",    "드라마", 2019);
-    Movie m2(2, "인터스텔라", "SF",    2014);
+    std::vector<Movie> movies;
 
-    m1.addRating(4.8);
-    m2.addRating(4.9);
+    movies.push_back(Movie(1, "기생충",    "드라마", 2019));
+    movies.push_back(Movie(2, "인터스텔라", "SF",    2014));
 
-    m1.display();
-    // 1. 기생충 (2019)  평점: 4.8 (1건)
-    m2.display();
-    // 2. 인터스텔라 (2014)  평점: 4.9 (1건)
+    movies[0].addRating(4.8);
+    movies[1].addRating(4.9);
+    movies[1].addRating(6.0);
 
-    m1.addRating(5.0);
-    m1.addRating(6.0);   // 유효성 검사 → 무시됨
+    std::cout << "\n [Vector 동작 확인] 영화 목록 " << std::endl;
+    for (const auto& m : movies) {
+        m.display();
+    }
+    
+    std::vector<User> users;
+    users.push_back(User(100, "김철수", "kim@ssu.ac.kr"));
 
-    std::cout << m1.getTitle() << ": "
-              << m1.getAverageRating() << std::endl;
-    // 기생충: 4.9  (4.8 + 5.0) / 2
+    std::vetor<Rating> ratings;
+    ratings.push_back(Rating(100, 1, 4.5));
+
+    std::cout << "사용자 및 평점 확인" << std::endl;
+    users[0].display();
+    ratings[0].display();
+
     return 0;
+
 }
