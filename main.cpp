@@ -1,3 +1,4 @@
+#include "Movie.h"
 #include "User.h"
 #include "Rating.h"
 #include <iostream>
