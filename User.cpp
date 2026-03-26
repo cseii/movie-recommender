@@ -13,6 +13,6 @@ std::string User::getEmail() const { return email; }
 
 void User::display() const {
     std::cout << "User ID: " << id
-              << "Name: " << name
-              << "Email: " << email << std::endl;
+              << "| Name: " << name
+              << "| Email: " << email << std::endl;
 }
