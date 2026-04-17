@@ -33,11 +33,7 @@ void Movie::addRating(double r) {
 //연산자 오버로딩
 bool Movie::operator==(const Movie& other) const {
     return this->id == other.id;
-}
-
-bool Movie::operator<(const Movie& other) const {
-    return this->getAverageRating() < other.getAverageRating();
-}
+}ㄴ
 
 //출력 연산자
 std::ostream& operator<<(std::ostream& os, const Movie& movie) {
