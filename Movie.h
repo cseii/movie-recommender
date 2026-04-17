@@ -27,9 +27,8 @@ public:
 
     //M2 핵심 추가
     bool operator==(const Movie& other) const;
-    bool operator<(const Movie& other) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Movie& movie);
-    
-    void display()               const;
+
+    void display() const;
 };
