@@ -30,14 +30,8 @@ public:
 
     int getMovieCount() const;
 
-    // BaseManager override
-    void loadFromFile(
-        const std::string& filename
-    ) override;
-
-    void saveToFile(
-        const std::string& filename
-    ) const override;
+    bool loadFromFile(const std::string& filename) override;
+    bool saveToFile(const std::string& filename) const override;
 
     int size() const override;
 };

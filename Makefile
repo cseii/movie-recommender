@@ -5,9 +5,13 @@ SRCDIR   = src
 OBJDIR   = obj
 
 OBJS = $(OBJDIR)/main.o \
+       $(OBJDIR)/Movie.o \
+       $(OBJDIR)/MovieManager.o \
+       $(OBJDIR)/user.o \
+       $(OBJDIR)/UserManager.o \
        $(OBJDIR)/Rating.o \
        $(OBJDIR)/RatingManager.o \
-       $(OBJDIR)/SimilarityCalculator.o
+       $(OBJDIR)/Recommender.o
 
 all: $(TARGET)
 
@@ -23,4 +27,6 @@ $(OBJDIR):
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
 
-.PHONY: all clean
+run: $(TARGET)
+		./$(TARGET)
+.PHONY: all clean run

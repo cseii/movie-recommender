@@ -1,21 +1,78 @@
 #include "RatingManager.h"
+#include <fstream>
+#include <sstream>
 #include <iostream>
+#include <set>
 
-void RatingManager::addRating(const Rating& rating, MovieManager& movieManager) {
-    Movie* movie = movieManager.findMovieById(rating.getMovieId());
-    if (movie == nullptr) {
-        std::cout << "[오류] ID " << rating.getMovieId() << "번 영화를 찾을 수 없어 평점을 등록할 수 없습니다.\n";
-        return;
+RatingManager::RatingManager() {}
+
+bool RatingManager::loadFromFile(const std::string& filename) {
+    std::ifstream fin(filename);
+    if (!fin.is_open()) {
+        std::cerr << "[RatingManager] 파일을 열 수 없습니다: " << filename << "\n";
+        return false;
     }
 
-    ratings.push_back(rating);
+    ratings.clear();
+    std::string line;
 
-    movie->addRating(rating.getScore());
-    std::cout << "평점이 성공적으로 등록되었습니다.\n";
+    if (!std::getline(fin, line)) {
+        return false;
+    }
+
+    while (std::getline(fin, line)) {
+        if (line.empty()) continue;
+        std::stringstream ss(line);
+        std::string uIdStr, mIdStr, scoreStr;
+
+        if (std::getline(ss, uIdStr, ',') &&
+            std::getline(ss, mIdStr, ',') &&
+            std::getline(ss, scoreStr, ',')) {
+            
+            int uId = std::stoi(uIdStr);
+            int mId = std::stoi(mIdStr);
+            int score = std::stoi(scoreStr);
+            ratings.push_back(Rating(uId, mId, score));
+        }
+    }
+    fin.close();
+    return true;
 }
 
-void RatingManager::printAllRatings() const {
-    for (const auto& r : ratings) {
-        r.display();
+bool RatingManager::saveToFile(const std::string& filename) const {
+    std::ofstream fout(filename);
+    if (!fout.is_open()) return false;
+
+    fout << "userId,movieId,score\n";
+    for (const Rating& r : ratings) {
+        fout << r.getUserId() << "," << r.getMovieId() << "," << r.getScore() << "\n";
     }
+    fout.close();
+    return true;
+}
+
+int RatingManager::size() const {
+    return static_cast<int>(ratings.size());
+}
+
+std::vector<Rating> RatingManager::findByUser(int userId) const {
+    std::vector<Rating> result;
+    for (const Rating& r : ratings) {
+        if (r.getUserId() == userId) {
+            result.push_back(r);
+        }
+    }
+    return result;
+}
+
+std::vector<int> RatingManager::getAllUserIds() const {
+    std::set<int> idSet;
+    for (const Rating& r : ratings) {
+        idSet.insert(r.getUserId());
+    }
+    return std::vector<int>(idSet.begin(), idSet.end());
+}
+
+void RatingManager::addRating(const Rating& rating) {
+    ratings.push_back(rating);
 }

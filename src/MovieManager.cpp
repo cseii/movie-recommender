@@ -102,9 +102,7 @@ int MovieManager::getMovieCount() const {
     return (int)movies.size();
 }
 
-void MovieManager::loadFromFile(
-    const std::string& filename
-) {
+bool MovieManager::loadFromFile(const std::string& filename) {
 
     std::ifstream file(filename);
 
@@ -113,7 +111,7 @@ void MovieManager::loadFromFile(
         std::cout
             << "파일 열기 실패\n";
 
-        return;
+        return true;
     }
 
     std::string line;
@@ -130,17 +128,13 @@ void MovieManager::loadFromFile(
 
         int id = stoi(idStr);
 
-        movies.push_back(
-            Movie(id, title)
-        );
+        movies.push_back(Movie(id, title, "", 0));
     }
 
     file.close();
 }
 
-void MovieManager::saveToFile(
-    const std::string& filename
-) const {
+bool MovieManager::saveToFile(const std::string& filename) const {
 
     std::ofstream file(filename);
 
@@ -150,6 +144,7 @@ void MovieManager::saveToFile(
              << ","
              << movie.getTitle()
              << "\n";
+    return true;
     }
 
     file.close();

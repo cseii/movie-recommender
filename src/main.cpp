@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include "MovieManager.h"
 #include "UserManager.h"
 #include "RatingManager.h"
+#include "Recommender.h" 
 
 void showMenu() {
     std::cout << "\n=== Movie Recommender ===" << std::endl;
@@ -14,9 +16,10 @@ void showMenu() {
     std::cout << "[ 사용자]" << std::endl;
     std::cout << "5. 사용자추가" << std::endl;
     std::cout << "6. 사용자목록출력" << std::endl;
-    std::cout << "[ 평점]" << std::endl;
+    std::cout << "[ 평점 및 추천]" << std::endl; 
     std::cout << "7. 평점입력" << std::endl;
     std::cout << "8. 영화별평점보기" << std::endl;
+    std::cout << "9. 맞춤 영화 추천 받기 (M3)" << std::endl; 
     std::cout << "0. 종료" << std::endl;
     std::cout << "선택> ";
 }
@@ -25,6 +28,14 @@ int main() {
     MovieManager movieMgr;
     UserManager userMgr;
     RatingManager ratingMgr;
+
+    if (!ratingMgr.loadFromFile("data/ratings.csv")) {
+        std::cerr << "[안내] 초기 평점 데이터 파일(data/ratings.csv)을 찾을 수 없어 빈 상태로 시작합니다.\n";
+    } else {
+        std::cout << "[시스템] 평점 데이터 " << ratingMgr.size() << "건을 정상적으로 로드했습니다.\n";
+    }
+
+    Recommender recommender(ratingMgr);
 
     int choice;
     while (true) {
@@ -79,11 +90,40 @@ int main() {
                 std::cout << "사용자 ID: "; std::cin >> uId;
                 std::cout << "영화 ID: "; std::cin >> mId;
                 std::cout << "평점 (0.0~5.0): "; std::cin >> score;
-                ratingMgr.addRating(Rating(uId, mId, score), movieMgr);
+                ratingMgr.addRating(Rating(uId, mId, score));
                 break;
             }
             case 8: { 
                 movieMgr.printAllMovies(); 
+                break;
+            }
+            case 9: { 
+                int targetUserId, K, N;
+                std::cout << "추천을 진행할 대상 사용자 ID: ";
+                std::cin >> targetUserId;
+                std::cout << "유사도를 분석할 이웃의 수 (K): ";
+                std::cin >> K;
+                std::cout << "추천받을 영화의 최대 개수 (N): ";
+                std::cin >> N;
+
+                std::cout << "\n[알고리즘] User " << targetUserId << " 번의 영화 추천 리스트를 생성하는 중...\n";
+                
+                std::vector<int> recommendations = recommender.recommend(targetUserId, K, N);
+
+                if (recommendations.empty()) {
+                    std::cout << "=> [안내] 이 사용자에게 추천할 만한 새로운 영화 정보를 찾을 수 없습니다.\n";
+                    std::cout << "   (이유: 평가 데이터 부족 또는 이웃 사용자들이 본 영화를 이미 모두 시청함)\n";
+                } else {
+                    std::cout << "================= [ 맞춤 추천 영화 목록 ] =================\n";
+                    for (size_t i = 0; i < recommendations.size(); ++i) {
+                        int mId = recommendations[i];
+                        std::cout << " " << i + 1 << "위: 영화 ID [ " << mId << " ]";
+                        
+                        
+                        std::cout << "\n";
+                    }
+                    std::cout << "===========================================================\n";
+                }
                 break;
             }
             default:
