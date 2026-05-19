@@ -28,7 +28,7 @@ std::vector<int> Recommender::recommend(int targetUserId, int K, int N) {
     }
 
     std::vector<std::pair<int, int>> userSimilarities; 
-        std::vector<int> allUserIds = ratingManager.getAllUserIds();
+    std::vector<int> allUserIds = ratingManager.getAllUserIds();
 
     for (int otherId : allUserIds) {
         if (otherId == targetUserId) continue; 
@@ -43,12 +43,22 @@ std::vector<int> Recommender::recommend(int targetUserId, int K, int N) {
                   return a.second > b.second;
               });
 
+    std::cout << "\n--- 유사도 계산 결과 ---\n";
+    std::cout << " 기준 User " << targetUserId << "\n\n";
+    for (size_t i = 0; i < userSimilarities.size() && i < (size_t)K; ++i) {
+        if (userSimilarities[i].second == -100) continue;
+        std::cout << "  User " << userSimilarities[i].first << " : " << userSimilarities[i].second << "\n";
+    }
+    if (!userSimilarities.empty() && userSimilarities[0].second != -100) {
+        std::cout << " → User " << targetUserId << "과 가장 비슷한 사람: User " << userSimilarities[0].first << "\n";
+    }
+
     int actualK = std::min(K, static_cast<int>(userSimilarities.size()));
 
     std::map<int, int> movieScores; 
 
     for (int i = 0; i < actualK; ++i) {
-                if (userSimilarities[i].second == -100) continue; 
+        if (userSimilarities[i].second == -100) continue; 
 
         int simUserId = userSimilarities[i].first;
         std::vector<Rating> simUserRatings = ratingManager.findByUser(simUserId);
