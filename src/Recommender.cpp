@@ -1,13 +1,12 @@
 #include "Recommender.h"
-#include <cstdlib>   // std::abs
-#include <algorithm> // std::sort, std::min
+#include <cstdlib>   
+#include <algorithm> 
 #include <set>
 #include <map>
 #include <iostream>
 
 Recommender::Recommender(const RatingManager& rm) : ratingManager(rm) {}
 
-// 교수님이 주신 공식 기반 유사도 계산
 int Recommender::Similaritycalculate(const std::vector<Rating>& ratingsA, const std::vector<Rating>& ratingsB) {
     int commonCount = 0;
     int scoreDiffSum = 0;
