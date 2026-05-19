@@ -1,32 +1,41 @@
 #include "MovieManager.h"
-#include <iostream>
-#include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <algorithm> 
 
 void MovieManager::addMovie(const Movie& movie) {
-    for (const auto& m : movies) {
-        if (m.getId() == movie.getId()) {
-            std::cout << "[오류] ID " << movie.getId() << "번 영화가 이미 존재합니다.\n";
-            return;
-        }
-    }
     movies.push_back(movie);
 }
 
+void MovieManager::sortMoviesById() {
+    std::sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
+        return a.getId() < b.getId();
+    });
+    std::cout << "영화 목록이 ID순으로 정렬되었습니다.\n";
+}
+
+void MovieManager::sortMoviesByRating() {
+    std::sort(movies.begin(), movies.end(), [](const Movie& a, const Movie& b) {
+        return a.getAverageRating() > b.getAverageRating(); 
+    });
+    std::cout << "영화 목록이 평점순으로 정렬되었습니다.\n";
+}
+
 Movie* MovieManager::findMovieByTitle(const std::string& title) {
-    for (auto& movie : movies) {
-        if (movie.getTitle() == title) {
-            return &movie;
+    for (size_t i = 0; i < movies.size(); ++i) {
+        if (movies[i].getTitle() == title) {
+            return &movies[i]; 
         }
     }
-    return nullptr;
+    return nullptr; 
 }
 
 Movie* MovieManager::findMovieById(int id) {
-    for (auto& movie : movies) {
-        if (movie.getId() == id) {
-            return &movie;
+    for (size_t i = 0; i < movies.size(); ++i) {
+        if (movies[i].getId() == id) {
+            return &movies[i];
         }
     }
     return nullptr;
@@ -38,50 +47,54 @@ void MovieManager::printAllMovies() const {
         return;
     }
     for (const auto& movie : movies) {
-        std::cout << movie << std::endl;
+        std::cout << movie << "\n";
     }
 }
 
-void MovieManager::sortMoviesByRating() {
-    std::sort(
-        movies.begin(),
-        movies.end(),
-        [](const Movie& a, const Movie& b) {
-            return a.getAverageRating() > b.getAverageRating();
-        }
-    );
+int MovieManager::size() const {
+    return movies.size();
 }
-
-void MovieManager::sortMoviesById() {
-    std::sort(movies.begin(), movies.end());
-    std::cout << "영화 목록이 ID순으로 정렬되었습니다.\n";
-}
-
-int MovieManager::getMovieCount() const {
-    return (int)movies.size();
-}
-
 
 bool MovieManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
-    if (!file) {
-        std::cout << "파일 열기 실패\n";
+    if (!file.is_open()) {
         return false; 
     }
 
     std::string line;
-    while (getline(file, line)) {
+    std::string header;
+    
+    if (std::getline(file, header)) { /* 패스 */ }
+
+    while (std::getline(file, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        
         if (line.empty()) continue;
 
         std::stringstream ss(line);
         std::string idStr;
         std::string title;
+        std::string genre;
+        std::string yearStr;
 
-        getline(ss, idStr, ',');
-        getline(ss, title);
-
-        int id = stoi(idStr);
-        movies.push_back(Movie(id, title, "", 0));
+        if (std::getline(ss, idStr, ',') &&
+            std::getline(ss, title, ',') &&
+            std::getline(ss, genre, ',') &&
+            std::getline(ss, yearStr)) {
+            
+            try {
+                if (idStr.empty() || yearStr.empty()) continue;
+                int id = std::stoi(idStr);
+                int year = std::stoi(yearStr);
+                
+                // Movie.h 규격에 맞게 4개 데이터를 꽉 채워서 추가해 줍니다!
+                movies.push_back(Movie(id, title, genre, year));
+            } catch (...) {
+                continue; 
+            }
+        }
     }
 
     file.close();
@@ -90,19 +103,19 @@ bool MovieManager::loadFromFile(const std::string& filename) {
 
 bool MovieManager::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
-    if (!file) {
-        std::cout << "파일 저장 열기 실패\n";
+    if (!file.is_open()) {
         return false;
     }
 
+    file << "id,title\n";
+
     for (const auto& movie : movies) {
-        file << movie.getId() << "," << movie.getTitle() << "\n";
+        file << movie.getId() << "," 
+             << movie.getTitle() << "," 
+             << movie.getGenre() << "," 
+             << movie.getReleaseYear() << "\n";
     }
 
     file.close();
-    return true; 
-}
-
-int MovieManager::size() const {
-    return movies.size();
+    return true;
 }

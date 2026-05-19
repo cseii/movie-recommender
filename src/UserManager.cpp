@@ -31,26 +31,34 @@ void UserManager::printAllUsers() const {
 bool UserManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "[오류] 유저 파일을 열 수 없습니다: " << filename << "\n";
         return false;
     }
 
-    std::string line;
+    std::string line, header;
+    if (std::getline(file, header)) { /* 헤더 패스 */ }
+
     while (std::getline(file, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
         if (line.empty()) continue;
 
         std::stringstream ss(line);
-        std::string idStr, name;
+        std::string idStr, name, email;
 
-        if (std::getline(ss, idStr, ',') && std::getline(ss, name)) {
-            int id = std::stoi(idStr);
+        if (std::getline(ss, idStr, ',')) {
+            std::getline(ss, name, ',');
+            std::getline(ss, email);
 
-            if (findUserById(id) == nullptr) {
-                users.push_back(User(id, name, ""));
+            try {
+                if (idStr.empty()) continue;
+                int id = std::stoi(idStr);
+                users.push_back(User(id, name, email));
+            } catch (...) {
+                continue; 
             }
         }
     }
-
     file.close();
     return true;
 }

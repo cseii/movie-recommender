@@ -7,35 +7,39 @@
 RatingManager::RatingManager() {}
 
 bool RatingManager::loadFromFile(const std::string& filename) {
-    std::ifstream fin(filename);
-    if (!fin.is_open()) {
-        std::cerr << "[RatingManager] 파일을 열 수 없습니다: " << filename << "\n";
+    std::ifstream file(filename);
+    if (!file.is_open()) {
         return false;
     }
 
-    ratings.clear();
-    std::string line;
+    std::string line, header;
+    if (std::getline(file, header)) { /* 헤더 패스 */ }
 
-    if (!std::getline(fin, line)) {
-        return false;
-    }
-
-    while (std::getline(fin, line)) {
+    while (std::getline(file, line)) {
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
         if (line.empty()) continue;
+
         std::stringstream ss(line);
         std::string uIdStr, mIdStr, scoreStr;
 
-        if (std::getline(ss, uIdStr, ',') &&
-            std::getline(ss, mIdStr, ',') &&
-            std::getline(ss, scoreStr, ',')) {
-            
-            int uId = std::stoi(uIdStr);
-            int mId = std::stoi(mIdStr);
-            int score = std::stoi(scoreStr);
-            ratings.push_back(Rating(uId, mId, score));
+        if (std::getline(ss, uIdStr, ',')) {
+            std::getline(ss, mIdStr, ',');
+            std::getline(ss, scoreStr);
+
+            try {
+                if (uIdStr.empty() || mIdStr.empty() || scoreStr.empty()) continue;
+                int uId = std::stoi(uIdStr);
+                int mId = std::stoi(mIdStr);
+                double score = std::stod(scoreStr); 
+                ratings.push_back(Rating(uId, mId, score));
+            } catch (...) {
+                continue; 
+            }
         }
     }
-    fin.close();
+    file.close();
     return true;
 }
 

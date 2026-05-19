@@ -29,6 +29,18 @@ int main() {
     UserManager userMgr;
     RatingManager ratingMgr;
 
+    if (!movieMgr.loadFromFile("data/movies.csv")) {
+        std::cerr << "[안내] 초기 영화 데이터 파일(data/movies.csv)을 찾을 수 없습니다.\n";
+    } else {
+        std::cout << "[시스템] 영화 데이터 " << movieMgr.size() << "건을 정상적으로 로드했습니다.\n";
+    }
+
+    if (!userMgr.loadFromFile("data/users.csv")) {
+        std::cerr << "[안내] 초기 사용자 데이터 파일(data/users.csv)을 찾을 수 없습니다.\n";
+    } else {
+        std::cout << "[시스템] 사용자 데이터 " << userMgr.size() << "건을 정상적으로 로드했습니다.\n";
+    }
+
     if (!ratingMgr.loadFromFile("data/ratings.csv")) {
         std::cerr << "[안내] 초기 평점 데이터 파일(data/ratings.csv)을 찾을 수 없어 빈 상태로 시작합니다.\n";
     } else {
@@ -90,11 +102,24 @@ int main() {
                 std::cout << "사용자 ID: "; std::cin >> uId;
                 std::cout << "영화 ID: "; std::cin >> mId;
                 std::cout << "평점 (0.0~5.0): "; std::cin >> score;
+
                 ratingMgr.addRating(Rating(uId, mId, score));
+                std::cout << "[시스템] 사용자 " << uId << "님이 영화 " << mId << "번에 " << score << "점을 입력했습니다.\n";
                 break;
             }
             case 8: { 
-                movieMgr.printAllMovies(); 
+                std::cout << "=== 영화별 평점 보기 ===\n";
+                
+                for (int i = 1; i <= 100; ++i) { 
+                    Movie* m = movieMgr.findMovieById(i);
+                    if (!m) continue;
+
+                    std::cout << "[" << m->getId() << "] " << m->getTitle();
+                    
+                    std::cout << " | 장르: " << m->getGenre()
+                              << " | 평점: " << m->getAverageRating() 
+                              << " (" << m->getRatingCount() << "건)\n";
+                }
                 break;
             }
             case 9: { 
@@ -119,7 +144,10 @@ int main() {
                         int mId = recommendations[i];
                         std::cout << " " << i + 1 << "위: 영화 ID [ " << mId << " ]";
                         
-                        
+                        Movie* m = movieMgr.findMovieById(mId);
+                        if (m) {
+                            std::cout << " - 제목: " << m->getTitle();
+                        }
                         std::cout << "\n";
                     }
                     std::cout << "===========================================================\n";
@@ -130,6 +158,11 @@ int main() {
                 std::cout << "잘못된 선택입니다.\n";
         }
     }
-    std::cout << "프로그램을 종료합니다.\n";
+
+    movieMgr.saveToFile("data/movies.csv");
+    userMgr.saveToFile("data/users.csv");
+    ratingMgr.saveToFile("data/ratings.csv");
+
+    std::cout << "데이터를 파일에 저장하고 프로그램을 종료합니다.\n";
     return 0;
 }
