@@ -1,21 +1,12 @@
 #include "UserManager.h"
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <algorithm>
 
 void UserManager::addUser(const User& user) {
-    if (findUserById(user.getId()) != nullptr) {
-        std::cout << "[오류] ID " << user.getId() << " 사용자가 이미 존재합니다.\n";
-        return;
-    }
     users.push_back(user);
-}
-
-User* UserManager::findUserById(int id) {
-    for (auto& user : users) {
-        if (user.getId() == id) return &user;
-    }
-    return nullptr;
 }
 
 void UserManager::printAllUsers() const {
@@ -24,21 +15,32 @@ void UserManager::printAllUsers() const {
         return;
     }
     for (const auto& user : users) {
-        user.display();
+        std::cout << user << "\n";
     }
+}
+
+int UserManager::size() const {
+    return users.size();
+}
+
+User* UserManager::findUserById(int id) {
+    for (size_t i = 0; i < users.size(); ++i) {
+        if (users[i].getId() == id) {
+            return &users[i];
+        }
+    }
+    return nullptr;
 }
 
 bool UserManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        return false;
-    }
+    if (!file.is_open()) return false;
 
     std::string line, header;
-    if (std::getline(file, header)) { /* 헤더 패스 */ }
+    if (std::getline(file, header)) {} 
 
     while (std::getline(file, line)) {
-        if (!line.empty() && line.back() == '\r') {
+        while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
             line.pop_back();
         }
         if (line.empty()) continue;
@@ -46,16 +48,18 @@ bool UserManager::loadFromFile(const std::string& filename) {
         std::stringstream ss(line);
         std::string idStr, name, email;
 
-        if (std::getline(ss, idStr, ',')) {
-            std::getline(ss, name, ',');
-            std::getline(ss, email);
+        if (std::getline(ss, idStr, ',') &&
+            std::getline(ss, name, ',')) {
+            
+            if (!std::getline(ss, email)) {
+                email = "unknown@example.com";
+            }
 
             try {
-                if (idStr.empty()) continue;
                 int id = std::stoi(idStr);
                 users.push_back(User(id, name, email));
             } catch (...) {
-                continue; 
+                continue;
             }
         }
     }
@@ -65,19 +69,14 @@ bool UserManager::loadFromFile(const std::string& filename) {
 
 bool UserManager::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "[오류] 유저 저장을 위한 파일을 생성할 수 없습니다: " << filename << "\n";
-        return false;
-    }
+    if (!file.is_open()) return false;
 
+    file << "id,name,email\n";
     for (const auto& user : users) {
-        file << user.getId() << "," << user.getName() << "\n";
+        file << user.getId() << "," 
+             << user.getName() << "," 
+             << user.getEmail() << "\n";
     }
-
     file.close();
     return true;
-}
-
-int UserManager::size() const {
-    return users.size();
 }

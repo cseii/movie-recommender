@@ -1,3 +1,4 @@
-1,Alice
-2,Bob
-3,Charlie
+id,name,email
+1,Alice,alice@ssu.ac.kr
+2,Bob,bob@ssu.ac.kr
+3,Charlie,charlie@naver.com
