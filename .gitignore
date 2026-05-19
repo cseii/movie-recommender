@@ -1,0 +1,8 @@
+*.o
+*.a
+*.out
+obj/
+main
+app
+.vscode/
+.idea/
