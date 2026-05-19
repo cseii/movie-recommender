@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "user.h"
+#include "User.h"
 #include "BaseManager.h"
 
 class UserManager : public BaseManager {

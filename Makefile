@@ -7,7 +7,7 @@ OBJDIR   = obj
 OBJS = $(OBJDIR)/main.o \
        $(OBJDIR)/Movie.o \
        $(OBJDIR)/MovieManager.o \
-       $(OBJDIR)/user.o \
+       $(OBJDIR)/User.o \
        $(OBJDIR)/UserManager.o \
        $(OBJDIR)/Rating.o \
        $(OBJDIR)/RatingManager.o \
