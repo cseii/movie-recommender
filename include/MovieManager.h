@@ -7,6 +7,7 @@
 #include "Movie.h"
 #include "BaseManager.h"
 
+// 상속 선언
 class MovieManager : public BaseManager {
 
 private:

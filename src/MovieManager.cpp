@@ -26,7 +26,7 @@ void MovieManager::sortMoviesByRating() {
 Movie* MovieManager::findMovieByTitle(const std::string& title) {
     for (size_t i = 0; i < movies.size(); ++i) {
         if (movies[i].getTitle() == title) {
-            return &movies[i]; 
+            return &movies[i];     // 원본 데이터의 주소값 리턴
         }
     }
     return nullptr; 
@@ -60,11 +60,11 @@ bool MovieManager::loadFromFile(const std::string& filename) {
     if (!file.is_open()) return false;
 
     std::string line, header;
-    if (std::getline(file, header)) {} 
+    if (std::getline(file, header)) {}   // 헤더 스킵
 
     while (std::getline(file, line)) {
         while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
-            line.pop_back();
+            line.pop_back();             
         }
         if (line.empty()) continue;
 
