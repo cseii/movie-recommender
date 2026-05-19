@@ -57,27 +57,19 @@ int MovieManager::size() const {
 
 bool MovieManager::loadFromFile(const std::string& filename) {
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        return false; 
-    }
+    if (!file.is_open()) return false;
 
-    std::string line;
-    std::string header;
-    
-    if (std::getline(file, header)) { /* 패스 */ }
+    std::string line, header;
+    if (std::getline(file, header)) {} 
 
     while (std::getline(file, line)) {
-        if (!line.empty() && line.back() == '\r') {
+        while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
             line.pop_back();
         }
-        
         if (line.empty()) continue;
 
         std::stringstream ss(line);
-        std::string idStr;
-        std::string title;
-        std::string genre;
-        std::string yearStr;
+        std::string idStr, title, genre, yearStr;
 
         if (std::getline(ss, idStr, ',') &&
             std::getline(ss, title, ',') &&
@@ -85,37 +77,29 @@ bool MovieManager::loadFromFile(const std::string& filename) {
             std::getline(ss, yearStr)) {
             
             try {
-                if (idStr.empty() || yearStr.empty()) continue;
                 int id = std::stoi(idStr);
                 int year = std::stoi(yearStr);
-                
-                // Movie.h 규격에 맞게 4개 데이터를 꽉 채워서 추가해 줍니다!
                 movies.push_back(Movie(id, title, genre, year));
             } catch (...) {
                 continue; 
             }
         }
     }
-
     file.close();
     return true; 
 }
 
 bool MovieManager::saveToFile(const std::string& filename) const {
     std::ofstream file(filename);
-    if (!file.is_open()) {
-        return false;
-    }
+    if (!file.is_open()) return false;
 
-    file << "id,title\n";
-
+    file << "id,title,genre,year\n";
     for (const auto& movie : movies) {
         file << movie.getId() << "," 
              << movie.getTitle() << "," 
              << movie.getGenre() << "," 
              << movie.getReleaseYear() << "\n";
     }
-
     file.close();
     return true;
 }

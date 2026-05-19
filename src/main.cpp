@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include "MovieManager.h"
 #include "UserManager.h"
 #include "RatingManager.h"
@@ -45,6 +47,35 @@ int main() {
         std::cerr << "[안내] 초기 평점 데이터 파일(data/ratings.csv)을 찾을 수 없어 빈 상태로 시작합니다.\n";
     } else {
         std::cout << "[시스템] 평점 데이터 " << ratingMgr.size() << "건을 정상적으로 로드했습니다.\n";
+    }
+
+
+    {
+        std::ifstream rFile("data/ratings.csv");
+        if (rFile.is_open()) {
+            std::string rLine, rHeader;
+            if (std::getline(rFile, rHeader)) {}
+            while (std::getline(rFile, rLine)) {
+                while (!rLine.empty() && (rLine.back() == '\r' || rLine.back() == '\n')) {
+                    rLine.pop_back();
+                }
+                if (rLine.empty()) continue;
+                
+                std::stringstream rss(rLine);
+                std::string uStr, mStr, sStr;
+                if (std::getline(rss, uStr, ',') && std::getline(rss, mStr, ',') && std::getline(rss, sStr)) {
+                    try {
+                        int mId = std::stoi(mStr);
+                        double score = std::stod(sStr);
+                        Movie* m = movieMgr.findMovieById(mId);
+                        if (m) {
+                            m->addRating(score); 
+                        }
+                    } catch (...) { continue; }
+                }
+            }
+            rFile.close();
+        }
     }
 
     Recommender recommender(ratingMgr);
@@ -102,52 +133,40 @@ int main() {
                 std::cout << "사용자 ID: "; std::cin >> uId;
                 std::cout << "영화 ID: "; std::cin >> mId;
                 std::cout << "평점 (0.0~5.0): "; std::cin >> score;
-
+                
                 ratingMgr.addRating(Rating(uId, mId, score));
-                std::cout << "[시스템] 사용자 " << uId << "님이 영화 " << mId << "번에 " << score << "점을 입력했습니다.\n";
+                
+                Movie* m = movieMgr.findMovieById(mId);
+                if (m) {
+                    m->addRating(score);
+                }
+                std::cout << "[시스템] 평점이 실시간으로 연동되었습니다.\n";
                 break;
             }
             case 8: { 
                 std::cout << "=== 영화별 평점 보기 ===\n";
-                
-                for (int i = 1; i <= 100; ++i) { 
-                    Movie* m = movieMgr.findMovieById(i);
-                    if (!m) continue;
-
-                    std::cout << "[" << m->getId() << "] " << m->getTitle();
-                    
-                    std::cout << " | 장르: " << m->getGenre()
-                              << " | 평점: " << m->getAverageRating() 
-                              << " (" << m->getRatingCount() << "건)\n";
-                }
+                movieMgr.sortMoviesById();
+                movieMgr.printAllMovies();
                 break;
             }
             case 9: { 
                 int targetUserId, K, N;
-                std::cout << "추천을 진행할 대상 사용자 ID: ";
-                std::cin >> targetUserId;
-                std::cout << "유사도를 분석할 이웃의 수 (K): ";
-                std::cin >> K;
-                std::cout << "추천받을 영화의 최대 개수 (N): ";
-                std::cin >> N;
+                std::cout << "추천을 진행할 대상 사용자 ID: "; std::cin >> targetUserId;
+                std::cout << "유사도를 분석할 이웃의 수 (K): "; std::cin >> K;
+                std::cout << "추천받을 영화의 최대 개수 (N): "; std::cin >> N;
 
                 std::cout << "\n[알고리즘] User " << targetUserId << " 번의 영화 추천 리스트를 생성하는 중...\n";
-                
                 std::vector<int> recommendations = recommender.recommend(targetUserId, K, N);
 
                 if (recommendations.empty()) {
                     std::cout << "=> [안내] 이 사용자에게 추천할 만한 새로운 영화 정보를 찾을 수 없습니다.\n";
-                    std::cout << "   (이유: 평가 데이터 부족 또는 이웃 사용자들이 본 영화를 이미 모두 시청함)\n";
                 } else {
                     std::cout << "================= [ 맞춤 추천 영화 목록 ] =================\n";
                     for (size_t i = 0; i < recommendations.size(); ++i) {
                         int mId = recommendations[i];
                         std::cout << " " << i + 1 << "위: 영화 ID [ " << mId << " ]";
-                        
                         Movie* m = movieMgr.findMovieById(mId);
-                        if (m) {
-                            std::cout << " - 제목: " << m->getTitle();
-                        }
+                        if (m) std::cout << " - 제목: " << m->getTitle();
                         std::cout << "\n";
                     }
                     std::cout << "===========================================================\n";
