@@ -12,15 +12,18 @@ void UserManager::addUser(const User& user) {
 void UserManager::printAllUsers() const {
     if (users.empty()) {
         std::cout << "등록된 사용자가 없습니다.\n";
-        return;
+        return;   // 불필요한 루프를 돌지 않고 즉시 리턴
     }
     for (const auto& user : users) {
-        std::cout << user << "\n";
+        std::cout << "사용자 ID: " << user.getId() 
+                  << " | 이름: " << user.getName() 
+                  << " | 이메일: " << user.getEmail() << "\n";
     }
 }
 
+// 부모 클래스의 순수 가상 함수 size() 실제 구현
 int UserManager::size() const {
-    return users.size();
+    return static_cast<int>(users.size());
 }
 
 User* UserManager::findUserById(int id) {

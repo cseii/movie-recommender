@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <vector>   // 동적 배열 std::vector를 쓰기 위해
+#include <vector>   
 #include <fstream>
 #include <sstream>
 #include "MovieManager.h"
@@ -22,8 +22,6 @@ void showMenu() {
     std::cout << "7. 평점 입력" << std::endl;
     std::cout << "8. 영화별 평점 보기" << std::endl;
     std::cout << "9. 맞춤 영화 추천 받기 (M3)" << std::endl; 
-    
-    // [피피티 확장 과제 기능 메뉴 반영]
     std::cout << "[ 시스템 확장 기능 ]" << std::endl;
     std::cout << "10. 영화별 평균 평점 Top N 통계 보기" << std::endl;
     std::cout << "11. 수동으로 CSV 평점 데이터 백업 실행" << std::endl;
@@ -32,7 +30,6 @@ void showMenu() {
 }
 
 int main() {
-    // 초기 데이터 로드 객체 생성
     MovieManager movieMgr;
     UserManager userMgr;
     RatingManager ratingMgr;
@@ -92,14 +89,13 @@ int main() {
     while (true) {
         showMenu();
 
-        // 예외 처리: 숫자가 아닌 변수 입력 차단
         if (!(std::cin >> choice)) {
             std::cin.clear();   
             std::cin.ignore(1000, '\n');   
             continue;
         }
 
-        if (choice == 0) break;   // 0번 선택 시 종료
+        if (choice == 0) break;   
 
         switch (choice) {
             case 1: {
@@ -183,9 +179,7 @@ int main() {
                 }
                 break;
             }
-
             case 10: { 
-                // 분리 컴파일해 둔 피피티 구조의 통계 함수 호출
                 recommender.printStatics(); 
                 break;
             }
@@ -200,9 +194,10 @@ int main() {
         }
     }
 
-    // 프로그램 완전히 꺼지기 전 자동 자동백업 
     movieMgr.saveToFile("data/movies.csv");
     userMgr.saveToFile("data/users.csv");
     ratingMgr.saveToFile("data/ratings.csv");
 
-    std::cout << "데이터를 파일에 안전하게 저장하고 프로그램을 종료합니다
+    std::cout << "데이터를 파일에 안전하게 저장하고 프로그램을 종료합니다.\n";
+    return 0;
+}
