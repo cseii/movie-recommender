@@ -2,64 +2,59 @@
 #include <map>
 #include <algorithm>
 #include <iostream>
-#include <iomainp>
+#include <iomanip>
 
-// ====================================================================
-// 추가 기능 2: 영화별 평균 평점 Top N 산출 및 출력 함수
-// ====================================================================
-void Recommender::printStatistics() const {
-    // 1. 생성자 시점에 주입받았던 ratingManager로부터 전체 평점 데이터 벡터를 가져옵니다.
+// 추가 기능: 영화별 평균 평점 Top N 산출 및 출력 함수
+void Recommender::printStatics() const { 
+    // 1. 전체 평점 데이터 가져오기
     const std::vector<Rating>& allRatings = ratingManager.getRatings();
     
-    // 만약 CSV 로드가 안 되었거나 평점 데이터가 없으면 경고 후 종료 (방어 코드)
     if (allRatings.empty()) {
         std::cout << "\n[Notice] 분석할 평점 데이터가 메모리에 존재하지 않습니다.\n";
         return;
     }
 
-    // 화면에 보여주고 싶은 상위 영화 개수 설정 (Top 5)
-    int N = 5; 
+    // 추출하고 싶은 상위 개수 지정 (Top 5)
+    int n = 5; 
 
-    std::cout << "\n=============================================\n";
-    std::cout << "       영화 추천 시스템: 평균 평점 Top " << N << "      \n";
-    std::cout << "=============================================\n";
-
-    // 2. 영화 ID별로 {평점 총점, 평가 참여 횟수}를 누적할 Map 자료구조 생성
-    // Key: movieId, Value: pair<평점합, 평가횟수>
+    // 2. 영화 ID별로 {평점 총점, 평가 횟수}를 누적할 맵 생성
     std::map<int, std::pair<double, int>> movieData;
-
     for (const Rating& r : allRatings) {
-        movieData[r.getMovieId()].first += r.getScore();  // 평점 점수 누적 합산
-        movieData[r.getMovieId()].second++;               // 해당 영화의 평가 횟수 1 증가
+        movieData[r.getMovieId()].first += r.getScore();
+        movieData[r.getMovieId()].second++;
     }
 
-    // 3. 정렬 알고리즘(std::sort)을 쓰기 위해 Map에 있던 데이터를 Vector로 복사
-    // 원소 형태: pair<movieId, 계산된_평균평점>
+    // 3. {영화ID, 평균평점} 쌍을 저장할 벡터 생성 및 데이터 산출
     std::vector<std::pair<int, double>> movieAverages;
-
     for (const auto& pair : movieData) {
-        int movieId = pair.first;
-        double totalScore = pair.second.first;
-        int count = pair.second.second;
-        
-        double average = totalScore / count; // 평균 평점 계산
-        movieAverages.push_back({movieId, average});
+        movieAverages.push_back({pair.first, pair.second.first / pair.second.second});
     }
 
-    // 4. 람다 함수를 사용해 평균 평점이 높은 순(내림차순)으로 정렬
-    std::sort(movieAverages.begin(), movieAverages.end(),
+    auto sorted = movieAverages;  // 복사 (원본 보호)
+
+    // PPT 람다식 정렬 그대로 적용 (내림차순 정렬)
+    std::sort(sorted.begin(), sorted.end(),
               [](const std::pair<int, double>& a, const std::pair<int, double>& b) {
-                  return a.second > b.second; // 앞의 원소 평점이 더 크도록 설정
+                  return a.second > b.second; // 내림차순
               });
 
-    // 5. 시스템 내 전체 영화 수가 요구한 N(5개)보다 적을 수 있으므로 std::min으로 제한
-    int actualN = std::min(N, static_cast<int>(movieAverages.size()));
+    // PPT의 static_cast를 이용한 바운더리 방어 코드 그대로 적용
+    if (n > static_cast<int>(sorted.size())) {
+        n = sorted.size();
+    }
 
-    // 6. 최종 결과를 순위별로 콘솔에 출력
-    for (int i = 0; i < actualN; ++i) {
-        int movieId = movieAverages[i].first;
-        double avgScore = movieAverages[i].second;
-        int totalVotes = movieData[movieId].second; // 이 영화에 투표한 총 유저 수
+    // PPT의 자르기(슬라이싱) 메커니즘을 이용해 상위 n개만 분리 추출
+    std::vector<std::pair<int, double>> topN(sorted.begin(), sorted.begin() + n);
+
+    // 4. 최종 결과 출력 화면 구성
+    std::cout << "\n=============================================\n";
+    std::cout << "      영화 추천 시스템: 평균 평점 Top " << n << "      \n";
+    std::cout << "=============================================\n";
+
+    for (int i = 0; i < n; ++i) {
+        int movieId = topN[i].first;
+        double avgScore = topN[i].second;
+        int totalVotes = movieData[movieId].second; // 맵에서 투표 참여 인원 가져오기
 
         std::cout << "  " << (i + 1) << "위: 영화 ID [" << movieId << "] "
                   << "-> 평균 평점: " << std::fixed << std::setprecision(2) << avgScore << " / 5.0 "

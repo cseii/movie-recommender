@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <vector>
+#include <vector>   // 동적 배열 std::vector를 쓰기 위해
 #include <fstream>
 #include <sstream>
 #include "MovieManager.h"
@@ -10,27 +10,34 @@
 
 void showMenu() {
     std::cout << "\n=== Movie Recommender ===" << std::endl;
-    std::cout << "[ 영화]" << std::endl;
-    std::cout << "1. 영화추가" << std::endl;
-    std::cout << "2. 제목으로검색" << std::endl;
-    std::cout << "3. 전체목록출력" << std::endl;
-    std::cout << "4. 평점순정렬출력" << std::endl;
-    std::cout << "[ 사용자]" << std::endl;
-    std::cout << "5. 사용자추가" << std::endl;
-    std::cout << "6. 사용자목록출력" << std::endl;
-    std::cout << "[ 평점 및 추천]" << std::endl; 
-    std::cout << "7. 평점입력" << std::endl;
-    std::cout << "8. 영화별평점보기" << std::endl;
+    std::cout << "[ 영화 ]" << std::endl;
+    std::cout << "1. 영화 추가" << std::endl;
+    std::cout << "2. 제목으로 검색" << std::endl;
+    std::cout << "3. 전체 목록 출력" << std::endl;
+    std::cout << "4. 평점순 정렬 출력" << std::endl;
+    std::cout << "[ 사용자 ]" << std::endl;
+    std::cout << "5. 사용자 추가" << std::endl;
+    std::cout << "6. 사용자 목록 출력" << std::endl;
+    std::cout << "[ 평점 및 추천 ]" << std::endl; 
+    std::cout << "7. 평점 입력" << std::endl;
+    std::cout << "8. 영화별 평점 보기" << std::endl;
     std::cout << "9. 맞춤 영화 추천 받기 (M3)" << std::endl; 
+    
+    // [피피티 확장 과제 기능 메뉴 반영]
+    std::cout << "[ 시스템 확장 기능 ]" << std::endl;
+    std::cout << "10. 영화별 평균 평점 Top N 통계 보기" << std::endl;
+    std::cout << "11. 수동으로 CSV 평점 데이터 백업 실행" << std::endl;
     std::cout << "0. 종료" << std::endl;
     std::cout << "선택> ";
 }
 
 int main() {
+    // 초기 데이터 로드 객체 생성
     MovieManager movieMgr;
     UserManager userMgr;
     RatingManager ratingMgr;
 
+    // 각각의 csv 파일로부터 기존 백업 데이터를 읽어와 벡터에 적재
     if (!movieMgr.loadFromFile("data/movies.csv")) {
         std::cerr << "[안내] 초기 영화 데이터 파일(data/movies.csv)을 찾을 수 없습니다.\n";
     } else {
@@ -49,12 +56,12 @@ int main() {
         std::cout << "[시스템] 평점 데이터 " << ratingMgr.size() << "건을 정상적으로 로드했습니다.\n";
     }
 
-
+    // 영화별 실시간 평균 평점 계산을 위한 초기 연동 블록
     {
         std::ifstream rFile("data/ratings.csv");
         if (rFile.is_open()) {
             std::string rLine, rHeader;
-            if (std::getline(rFile, rHeader)) {}
+            if (std::getline(rFile, rHeader)) {}   // 첫 줄 헤더 스킵
             while (std::getline(rFile, rLine)) {
                 while (!rLine.empty() && (rLine.back() == '\r' || rLine.back() == '\n')) {
                     rLine.pop_back();
@@ -67,29 +74,32 @@ int main() {
                     try {
                         int mId = std::stoi(mStr);
                         double score = std::stod(sStr);
-                        Movie* m = movieMgr.findMovieById(mId);
+                        Movie* m = movieMgr.findMovieById(mId);   
                         if (m) {
-                            m->addRating(score); 
+                            m->addRating(score);   
                         }
-                    } catch (...) { continue; }
+                    } catch (...) { continue; }   
                 }
             }
             rFile.close();
         }
     }
 
+    // 추천 및 통계 알고리즘 객체 생성
     Recommender recommender(ratingMgr);
 
     int choice;
     while (true) {
         showMenu();
+
+        // 예외 처리: 숫자가 아닌 변수 입력 차단
         if (!(std::cin >> choice)) {
-            std::cin.clear();
-            std::cin.ignore(1000, '\n');
+            std::cin.clear();   
+            std::cin.ignore(1000, '\n');   
             continue;
         }
 
-        if (choice == 0) break;
+        if (choice == 0) break;   // 0번 선택 시 종료
 
         switch (choice) {
             case 1: {
@@ -117,7 +127,7 @@ int main() {
                 movieMgr.sortMoviesByRating();
                 movieMgr.printAllMovies();
                 break;
-            case 5: {
+            case 5: {   
                 int id; std::string name, email;
                 std::cout << "사용자 ID: "; std::cin >> id; std::cin.ignore();
                 std::cout << "이름: "; std::getline(std::cin, name);
@@ -128,7 +138,7 @@ int main() {
             case 6: 
                 userMgr.printAllUsers();
                 break;
-            case 7: {
+            case 7: {   
                 int uId, mId; double score;
                 std::cout << "사용자 ID: "; std::cin >> uId;
                 std::cout << "영화 ID: "; std::cin >> mId;
@@ -149,7 +159,7 @@ int main() {
                 movieMgr.printAllMovies();
                 break;
             }
-            case 9: { 
+            case 9: {   
                 int targetUserId, K, N;
                 std::cout << "추천을 진행할 대상 사용자 ID: "; std::cin >> targetUserId;
                 std::cout << "유사도를 분석할 이웃의 수 (K): "; std::cin >> K;
@@ -173,15 +183,26 @@ int main() {
                 }
                 break;
             }
+
+            case 10: { 
+                // 분리 컴파일해 둔 피피티 구조의 통계 함수 호출
+                recommender.printStatics(); 
+                break;
+            }
+            case 11: {
+                std::string backupPath = "data/ratings_backup.csv";
+                std::cout << "[시스템] '" << backupPath << "' 경로로 평점 백업을 시도합니다.\n";
+                recommender.saveToCSV(backupPath);
+                break;
+            }
             default:
-                std::cout << "잘못된 선택입니다.\n";
+                std::cout << "잘못된 선택입니다. 다시 입력해 주세요.\n";
         }
     }
 
+    // 프로그램 완전히 꺼지기 전 자동 자동백업 
     movieMgr.saveToFile("data/movies.csv");
     userMgr.saveToFile("data/users.csv");
     ratingMgr.saveToFile("data/ratings.csv");
 
-    std::cout << "데이터를 파일에 저장하고 프로그램을 종료합니다.\n";
-    return 0;
-}
+    std::cout << "데이터를 파일에 안전하게 저장하고 프로그램을 종료합니다
