@@ -57,7 +57,7 @@ void MovieManager::printAllMovies() const {
                   << " | 제목: " << movie.getTitle() 
                   << " | 장르: " << movie.getGenre() 
                   << " | 개봉연도: " << movie.getReleaseYear() << "년"
-                  << " | ⭐️ 평균 평점: " << std::fixed << std::setprecision(1) << movie.getAverageRating() << " / 5.0\n";
+                  << " | 평균 평점: " << std::fixed << std::setprecision(1) << movie.getAverageRating() << " / 5.0\n";
     }
 }
 

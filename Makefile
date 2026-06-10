@@ -12,6 +12,7 @@ OBJS = $(OBJDIR)/main.o \
        $(OBJDIR)/Rating.o \
        $(OBJDIR)/RatingManager.o \
        $(OBJDIR)/Recommender.o \
+       $(OBJDIR)/Recommender_Stats.o \
        $(OBJDIR)/SimilarityCalculator.o
 
 all: $(TARGET)
